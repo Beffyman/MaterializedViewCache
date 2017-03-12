@@ -8,15 +8,27 @@ namespace ViewMaterializerCache
 {
 	public interface IViewCacheService
 	{
+		void Register(MethodInfo method, object methodCaller = null);
 
+		T Get<T>(Dictionary<string, object> Parameters);
+		object Get(Type type, Dictionary<string, object> Parameters);
+
+		bool Exists<T>(Dictionary<string, object> Parameters);
+		bool Exists(Type type, Dictionary<string, object> Parameters);
+
+		void ExpireVM<T>();
+		void ExpireVM(Type type);
+
+		void ExpireVM<T>(Dictionary<string, object> Parameters);
+		void ExpireVM(Type type, Dictionary<string, object> Parameters);
 	}
 
 
-	public sealed class ViewCacheService
+	public sealed class ViewCacheService : IViewCacheService, IDisposable
 	{
 
-		private Factory ViewFactory;
-		internal readonly ConcurrentDictionary<Type, ConcurrentList<CachedView>> _cachedVMs;
+		internal Factory ViewFactory;
+		internal ConcurrentDictionary<Type, ConcurrentList<CachedView>> _cachedVMs;
 
 
 		public ViewCacheService()
@@ -115,5 +127,13 @@ namespace ViewMaterializerCache
 			});
 		}
 
+		public void Dispose()
+		{
+			ViewFactory.Dispose();
+			ViewFactory = null;
+
+			_cachedVMs.Clear();
+			_cachedVMs = null;
+		}
 	}
 }

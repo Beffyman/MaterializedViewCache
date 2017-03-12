@@ -9,7 +9,7 @@ using ViewMaterializerCache.Attributes;
 
 namespace ViewMaterializerCache
 {
-	public class Factory
+	internal sealed class Factory : IDisposable
 	{
 		public Factory()
 		{
@@ -198,5 +198,10 @@ namespace ViewMaterializerCache
 
 		}
 
+		public void Dispose()
+		{
+			ClearLookups();
+			DtoLookups = null;
+		}
 	}
 }
