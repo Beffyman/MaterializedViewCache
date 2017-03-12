@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace ViewMaterializerCache
 {
@@ -11,10 +12,10 @@ namespace ViewMaterializerCache
 	}
 
 
-	public class ViewCacheService
+	public sealed class ViewCacheService
 	{
 
-		public Factory ViewFactory;
+		private Factory ViewFactory;
 		internal readonly ConcurrentDictionary<Type, ConcurrentList<CachedView>> _cachedVMs;
 
 
@@ -22,6 +23,11 @@ namespace ViewMaterializerCache
 		{
 			ViewFactory = new Factory();
 			_cachedVMs = new ConcurrentDictionary<Type, ConcurrentList<CachedView>>();
+		}
+
+		public void Register(MethodInfo method, object methodCaller = null)
+		{
+			ViewFactory.Register(method, methodCaller);
 		}
 
 		internal CachedView GetView(Type type, Dictionary<string, object> Parameters)

@@ -61,6 +61,14 @@ namespace ViewMaterializerCache
 			}
 		}
 
+		public void AddRange(IEnumerable<TValue> item)
+		{
+			lock (_lock)
+			{
+				_storage.AddRange(item);
+			}
+		}
+
 		public void Clear()
 		{
 			lock (_lock)

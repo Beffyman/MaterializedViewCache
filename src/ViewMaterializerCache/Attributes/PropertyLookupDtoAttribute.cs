@@ -14,20 +14,15 @@ namespace ViewMaterializerCache.Attributes
 		public Type SourceDto { get; set; }
 
 		/// <summary>
-		/// What property on the SourceDto will be used to get the value for this property
+		/// What property on the SourceDto will be used to get the value for this property.
+		/// Common usage, nameof(SourceDto.PropertyName)
 		/// </summary>
 		public string DtoPropertyName { get; set; }
 
-		/// <summary>
-		/// Name of the parameter used to lookup the SourceDto
-		/// </summary>
-		public string GetParameterName { get; set; }
-
-		public PropertyLookupDtoAttribute(Type SourceDto, string DtoPropertyName, string GetParameterName)
+		public PropertyLookupDtoAttribute(Type SourceDto, string DtoPropertyName)
 		{
 			this.SourceDto = SourceDto;
 			this.DtoPropertyName = DtoPropertyName;
-			this.GetParameterName = GetParameterName;
 		}
 	}
 }

@@ -15,16 +15,6 @@ namespace ViewMaterializerCache
 		{
 
 		}
-		public Factory(Dictionary<Type, (GetMethod getMethod, string parameterName)> dtoLookups)
-		{
-			foreach(var lookup in dtoLookups)
-			{
-				DtoLookups.TryAdd(lookup.Key, lookup.Value);
-			}
-
-		}
-
-
 
 
 		/// <summary>
@@ -32,26 +22,32 @@ namespace ViewMaterializerCache
 		/// </summary>
 		public bool ParallelGet { get; set; }
 
-		/// <summary>
-		/// Method declaration used for getters for the Vm properties
-		/// </summary>
-		/// <param name="obj"></param>
-		/// <returns></returns>
-		public delegate object GetMethod(object obj);
 
-		protected ConcurrentDictionary<Type, (GetMethod getMethod,string parameterName)> DtoLookups { get; set; } = new ConcurrentDictionary<Type, (GetMethod getMethod, string parameterName)>();
+		internal ConcurrentDictionary<Type, GetMethodDelegate> DtoLookups { get; set; } = new ConcurrentDictionary<Type, GetMethodDelegate>();
 
 
-		public void Register(Type type, (GetMethod getMethod, string parameterName) getInfo)
+		public void Register(MethodInfo method,object methodCaller = null)
 		{
-			if (!DtoLookups.ContainsKey(type))
+
+			Type returnType = method.ReturnType;
+
+			if(returnType == typeof(void))
 			{
-				DtoLookups.TryAdd(type, getInfo);
+				throw new Exception($"Method {method.Name} has a return type of void. You cannot register a method with a return type of void.");
 			}
-			else
+
+			if (DtoLookups.ContainsKey(returnType))
 			{
-				throw new Exception($"Type {type.Name} has already been registered.");
+				throw new Exception($"Type {returnType.Name} has already been registered.");
 			}
+
+			var getDelegate = new GetMethodDelegate
+			{
+				Method = method,
+				MethodCaller = methodCaller
+			};
+
+			DtoLookups.TryAdd(returnType, getDelegate);
 		}
 
 		public void ClearLookups()
@@ -61,12 +57,11 @@ namespace ViewMaterializerCache
 
 		public bool Remove(Type type)
 		{
-			(GetMethod getMethod, string parameterName) outObj;
-			return DtoLookups.TryRemove(type, out outObj);
+			return DtoLookups.TryRemove(type, out GetMethodDelegate outObj);
 		}
 
 
-		private IEnumerable<IGrouping<Type, (PropertyInfo pInfo, PropertyLookupDtoAttribute attribute)>> GetGroupedProperties(Type vmType)
+		private IEnumerable<IGrouping<Type, PropertyLookupInfo>> GetGroupedProperties(Type vmType)
 		{
 			TypeInfo vmTypeInfo = vmType.GetTypeInfo();
 
@@ -74,63 +69,14 @@ namespace ViewMaterializerCache
 
 			vmProperties = vmProperties.Where(x => x.GetMethod != null && x.SetMethod != null);
 
-			List<(PropertyInfo pInfo, PropertyLookupDtoAttribute attribute)> mappedList = vmProperties.Select(x => (x, x.GetCustomAttribute<PropertyLookupDtoAttribute>())).ToList();
+			List<PropertyLookupInfo> mappedList = vmProperties.Select(x => new PropertyLookupInfo
+			{
+				propertyInfo = x,
+				attribute = x.GetCustomAttribute<PropertyLookupDtoAttribute>()
+			}).ToList();
 
 			return mappedList.GroupBy(x => x.attribute.SourceDto);
 		}
-
-
-
-
-
-		public (bool valid, List<string> errors) IsValidVM<T>(bool throwErrors = true)
-		{
-			return IsValidVM(typeof(T), throwErrors);
-		}
-		public (bool valid, List<string> errors) IsValidVM(Type vmType, bool throwErrors = true)
-		{
-			List<string> errors = new List<string>();
-
-			var groupedTypeList = GetGroupedProperties(vmType);
-			foreach (var dtoType in groupedTypeList)
-			{
-				string parameterName = null;
-				foreach(var tuples in dtoType)
-				{
-					if(parameterName == null)
-					{
-						parameterName = tuples.attribute.GetParameterName;
-					}
-					else if(!string.Equals(parameterName, tuples.attribute.GetParameterName,StringComparison.CurrentCultureIgnoreCase))
-					{
-						string error = $"Property {tuples.pInfo.Name} does not follow the set standard for GetParameterName for Type {dtoType.Key.Name} which is {parameterName}.";
-						errors.Add(error);
-
-						if (throwErrors)
-						{
-							throw new Exception(error);
-						}
-						return (false,errors);
-					}
-				}
-
-				if (!DtoLookups.ContainsKey(dtoType.Key))
-				{
-					string error = $"Type {dtoType.Key.Name} does not have a lookup defined.";
-					errors.Add(error);
-
-					if (throwErrors)
-					{
-						throw new Exception(error);
-					}
-					return (false, errors);
-				}
-
-			}
-
-			return (!errors.Any(), errors);
-		}
-
 
 		public object Build(Type type, params Tuple<string, object>[] paramters)
 		{
@@ -139,10 +85,6 @@ namespace ViewMaterializerCache
 		public object Build(Type type, params KeyValuePair<string, object>[] paramters)
 		{
 			return BuildVM(type, paramters.ToDictionary(x => x.Key, y => y.Value));
-		}
-		public object Build(Type type, params (string key, object value)[] paramters)
-		{
-			return BuildVM(type, paramters.ToDictionary(x => x.key, y => y.value));
 		}
 		public object Build(Type type, Dictionary<string, object> paramters)
 		{
@@ -205,29 +147,45 @@ namespace ViewMaterializerCache
 			return finalVM;
 		}
 
-		private void GetDtoInfo<T>(Dictionary<string, object> paramters, IGrouping<Type, (PropertyInfo pInfo, PropertyLookupDtoAttribute attribute)> dtoType, T finalVM)
+		private void GetDtoInfo<T>(Dictionary<string, object> parameters, IGrouping<Type, PropertyLookupInfo> dtoType, T finalVM)
 		{
 			var lookupInfo = DtoLookups[dtoType.Key];
 
-			if (!paramters.ContainsKey(lookupInfo.parameterName))
+			//Lookup any missing parameters
+			if (lookupInfo.Method.GetParameters().Any(x => !parameters.ContainsKey(x.Name)))
 			{
-				throw new Exception($"Parameter {lookupInfo.parameterName} was not provided");
+				var invalidParameters = lookupInfo.Method.GetParameters().Where(x => !parameters.ContainsKey(x.Name));
+
+				throw new Exception($"Parameters {string.Join(", ", invalidParameters.Select(x => x.Name))} were not provided");
 			}
 
-			object parameterValue = paramters[lookupInfo.parameterName];
+			IOrderedEnumerable<ParameterInfo> orderedParameters = lookupInfo.Method.GetParameters().OrderBy(x => x.Position);
 
-			object returnValue = lookupInfo.getMethod.Invoke(parameterValue);
+			List<object> inputParameters = new List<object>();
 
-			if(returnValue.GetType() != dtoType.Key)
+			foreach(var param in orderedParameters)
 			{
-				throw new Exception($"{dtoType.Key.Name} was expected as the output for {lookupInfo.getMethod.GetMethodInfo().Name}, but {returnValue.GetType().Name} was returned.");
+				//already established that all parameters are provided
+				var matchingKey = parameters.Keys.SingleOrDefault(x => x.Equals(param.Name, StringComparison.CurrentCultureIgnoreCase));
+
+				object matchingParam = parameters[matchingKey];
+
+				inputParameters.Add(matchingParam);
 			}
 
-			foreach(var propGroup in dtoType)
+			var returnValue = lookupInfo.Method.Invoke(lookupInfo.MethodCaller, inputParameters.ToArray());
+
+
+			if (returnValue.GetType() != dtoType.Key)
+			{
+				throw new Exception($"{dtoType.Key.Name} was expected as the output for {lookupInfo.Method.Name}, but {returnValue.GetType().Name} was returned.");
+			}
+
+			foreach (var propGroup in dtoType)
 			{
 				var dtoProperty = dtoType.Key.GetTypeInfo().GetDeclaredProperty(propGroup.attribute.DtoPropertyName);
 
-				if(dtoProperty == null)
+				if (dtoProperty == null)
 				{
 					throw new Exception($"Property {propGroup.attribute.DtoPropertyName} does not exist in type {dtoType.Key.Name}");
 				}
@@ -235,7 +193,7 @@ namespace ViewMaterializerCache
 
 				object value = dtoProperty.GetValue(returnValue);
 
-				propGroup.pInfo.SetValue(finalVM, value);
+				propGroup.propertyInfo.SetValue(finalVM, value);
 			}
 
 		}
