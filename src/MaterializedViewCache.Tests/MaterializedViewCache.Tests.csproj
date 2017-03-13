@@ -56,7 +56,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ViewMaterializerCache\ViewMaterializerCache.csproj">
+    <ProjectReference Include="..\MaterializedViewCache\MaterializedViewCache.csproj">
       <Project>{38032785-0042-40d6-a051-7e84e041995a}</Project>
       <Name>ViewMaterializerCache</Name>
     </ProjectReference>

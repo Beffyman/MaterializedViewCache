@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 
-namespace ViewMaterializerCache
+namespace MaterializedViewCache
 {
-    public class GetMethodDelegate
+    internal class GetMethodDelegate
     {
 		public object MethodCaller { get; set; }
 		public MethodInfo Method { get; set; }

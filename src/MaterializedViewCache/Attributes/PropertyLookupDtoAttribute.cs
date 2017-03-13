@@ -4,8 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ViewMaterializerCache.Attributes
+namespace MaterializedViewCache.Attributes
 {
+	/// <summary>
+	/// Attribute that defines what dto property this property will be mapped from
+	/// </summary>
 	public class PropertyLookupDtoAttribute : Attribute
 	{
 		/// <summary>
@@ -19,6 +22,12 @@ namespace ViewMaterializerCache.Attributes
 		/// </summary>
 		public string DtoPropertyName { get; set; }
 
+
+		/// <summary>
+		/// Default Constructor
+		/// </summary>
+		/// <param name="SourceDto"></param>
+		/// <param name="DtoPropertyName"></param>
 		public PropertyLookupDtoAttribute(Type SourceDto, string DtoPropertyName)
 		{
 			this.SourceDto = SourceDto;

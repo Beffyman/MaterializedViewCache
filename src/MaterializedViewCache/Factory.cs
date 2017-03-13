@@ -5,9 +5,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using ViewMaterializerCache.Attributes;
+using MaterializedViewCache.Attributes;
 
-namespace ViewMaterializerCache
+namespace MaterializedViewCache
 {
 	internal sealed class Factory : IDisposable
 	{
@@ -103,10 +103,6 @@ namespace ViewMaterializerCache
 		{
 			return (T)BuildVM(typeof(T), paramters.ToDictionary(x => x.Key, y => y.Value));
 		}
-		public T Build<T>(params (string key, object value)[] paramters)
-		{
-			return (T)BuildVM(typeof(T), paramters.ToDictionary(x => x.key, y => y.value));
-		}
 		public T Build<T>(Dictionary<string, object> paramters)
 		{
 			return (T)BuildVM(typeof(T), paramters);
@@ -116,12 +112,6 @@ namespace ViewMaterializerCache
 			return (T)BuildVM(typeof(T), null);
 		}
 
-		/// <summary>
-		///
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="paramters">parameter name/values</param>
-		/// <returns></returns>
 		private object BuildVM(Type vmType, Dictionary<string, object> paramters)
 		{
 

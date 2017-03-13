@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
-using ViewMaterializerCache.Attributes;
+using MaterializedViewCache.Attributes;
 
-namespace ViewMaterializerCache
+namespace MaterializedViewCache
 {
 	internal class PropertyLookupInfo
 	{

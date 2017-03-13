@@ -1,30 +1,10 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ViewMaterializerCache.Attributes;
+using MaterializedViewCache.Attributes;
 
 namespace MaterializedViewCache.Tests
 {
-	public class TestVm
-	{
-		[PropertyLookupDto(typeof(SourceDto),nameof(SourceDto.Property1))]
-		public int vmProp1 { get; set; }
 
-		[PropertyLookupDto(typeof(SourceDto), nameof(SourceDto.Property2))]
-		public string vmProp2 { get; set; }
-
-		[PropertyLookupDto(typeof(SourceDto), nameof(SourceDto.Property3))]
-		public bool vmProp3 { get; set; }
-
-
-	}
-
-
-	public class SourceDto
-	{
-		public int Property1 { get; set; }
-		public string Property2 { get; set; }
-		public bool Property3 { get; set; }
-	}
 
 
 
@@ -33,6 +13,28 @@ namespace MaterializedViewCache.Tests
 	[TestClass]
 	public class UnitTest1
 	{
+		public class TestVm
+		{
+			[PropertyLookupDto(typeof(SourceDto), nameof(SourceDto.Property1))]
+			public int vmProp1 { get; set; }
+
+			[PropertyLookupDto(typeof(SourceDto), nameof(SourceDto.Property2))]
+			public string vmProp2 { get; set; }
+
+			[PropertyLookupDto(typeof(SourceDto), nameof(SourceDto.Property3))]
+			public bool vmProp3 { get; set; }
+
+
+		}
+
+
+		public class SourceDto
+		{
+			public int Property1 { get; set; }
+			public string Property2 { get; set; }
+			public bool Property3 { get; set; }
+		}
+
 		public SourceDto Get(int param1, string param2, bool param3)
 		{
 			return new SourceDto
@@ -47,7 +49,8 @@ namespace MaterializedViewCache.Tests
 		[TestMethod]
 		public void TestMethod1()
 		{
-			ViewMaterializerCache.ViewCacheService service = new ViewMaterializerCache.ViewCacheService();
+			//Use dependency injection if possible
+			MaterializedViewCache.ViewCacheService service = new MaterializedViewCache.ViewCacheService();
 
 
 

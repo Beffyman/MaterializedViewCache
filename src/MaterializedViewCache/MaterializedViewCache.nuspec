@@ -1,0 +1,24 @@
+<package>
+	<metadata>
+		<id>MaterializedViewCache</id>
+		<version>1.0.0</version>
+		<title>MaterializedViewCache</title>
+		<authors>Beffyman</authors>
+		<owners>Beffyman</owners>
+		<licenseUrl>https://github.com/Beffyman/MaterializedViewCache/blob/master/LICENSE.md</licenseUrl>
+		<projectUrl>https://github.com/Beffyman/MaterializedViewCache</projectUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>
+			A service that can build and cache view models based on what parameters they were provided to be built with.
+		</description>
+		<copyright>Copyright 2017</copyright>
+		<dependencies>
+			<dependency id="System.Threading.Tasks.Parallel" version="4.3.0" />
+		</dependencies>
+	</metadata>
+	<files>
+		<file src="bin\Release\**\MaterializedViewCache.dll" target="lib" />
+		<file src="bin\Release\**\MaterializedViewCache.pdb" target="lib" />
+		<file src="bin\Release\**\MaterializedViewCache.xml" target="lib" />
+	</files>
+</package>
