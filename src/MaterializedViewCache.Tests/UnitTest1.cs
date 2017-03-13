@@ -52,15 +52,18 @@ namespace MaterializedViewCache.Tests
 			//Use dependency injection if possible
 			MaterializedViewCache.ViewCacheService service = new MaterializedViewCache.ViewCacheService();
 
+			int param1 = 3;
+			string param2 = "testing";
+			bool param3 = false;
 
 
 			service.Register(typeof(UnitTest1).GetMethod(nameof(UnitTest1.Get)),this);
 
 			var vm = service.Get<TestVm>(new System.Collections.Generic.Dictionary<string, object>
 			{
-				{ "param1",3 },
-				{ "param2","testing" },
-				{ "param3",false },
+				{nameof(param1),param1},
+				{ nameof(param2),param2 },
+				{nameof(param3),param3},
 
 			});
 
