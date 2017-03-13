@@ -9,7 +9,7 @@
 		netstandard1.5;
 		netstandard1.6;
 	</TargetFrameworks>
-    <AssemblyName>ViewMaterializerCache</AssemblyName>
+    <AssemblyName>MaterializedViewCache</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard1.1|AnyCPU'">
