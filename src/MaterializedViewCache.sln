@@ -3,9 +3,16 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ViewMaterializerCache", "MaterializedViewCache\MaterializedViewCache.csproj", "{38032785-0042-40D6-A051-7E84E041995A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaterializedViewCache", "MaterializedViewCache\MaterializedViewCache.csproj", "{38032785-0042-40D6-A051-7E84E041995A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaterializedViewCache.Tests", "MaterializedViewCache.Tests\MaterializedViewCache.Tests.csproj", "{2D14D334-A074-4195-A78F-DD1E1CFD92B0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C0693FC9-7171-436F-8C76-5032DB655B06}"
+	ProjectSection(SolutionItems) = preProject
+		..\.gitignore = ..\.gitignore
+		..\LICENSE.md = ..\LICENSE.md
+		..\README.md = ..\README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
