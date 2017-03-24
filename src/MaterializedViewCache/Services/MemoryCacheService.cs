@@ -1,100 +1,38 @@
-﻿using System;
+﻿using MaterializedViewCache.Services.Memory;
+using MaterializedViewCache.Settings;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace MaterializedViewCache
+namespace MaterializedViewCache.Services
 {
-	/// <summary>
-	/// Interface for dependency injection
-	/// </summary>
-	public interface IViewCacheService
-	{
-		/// <summary>
-		/// Register a method and caller that will be mapped to the methods return type when using PropertyLookupDtoAttribute.
-		/// </summary>
-		/// <param name="method"></param>
-		/// <param name="methodCaller"></param>
-		void Register(MethodInfo method, object methodCaller = null);
-
-		/// <summary>
-		/// Get a cached VM of type with parameters.
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="Parameters"></param>
-		/// <returns></returns>
-		T Get<T>(Dictionary<string, object> Parameters);
-		/// <summary>
-		/// Get a cached VM of type with parameters.
-		/// </summary>
-		/// <param name="type"></param>
-		/// <param name="Parameters"></param>
-		/// <returns></returns>
-		object Get(Type type, Dictionary<string, object> Parameters);
-
-		/// <summary>
-		/// A VM of type with parameters has already been cached.
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="Parameters"></param>
-		/// <returns></returns>
-		bool Exists<T>(Dictionary<string, object> Parameters);
-		/// <summary>
-		/// A VM of type with parameters has already been cached.
-		/// </summary>
-		/// <param name="type"></param>
-		/// <param name="Parameters"></param>
-		/// <returns></returns>
-		bool Exists(Type type, Dictionary<string, object> Parameters);
-
-		/// <summary>
-		/// Expires all VMs of type
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		void ExpireVM<T>();
-		/// <summary>
-		/// Expires all VMs of type
-		/// </summary>
-		/// <param name="type"></param>
-		void ExpireVM(Type type);
-
-		/// <summary>
-		/// Expires a specific VM based on the parameters provided
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="Parameters"></param>
-		void ExpireVM<T>(Dictionary<string, object> Parameters);
-		/// <summary>
-		/// Expires a specific VM based on the parameters provided
-		/// </summary>
-		/// <param name="type"></param>
-		/// <param name="Parameters"></param>
-		void ExpireVM(Type type, Dictionary<string, object> Parameters);
-
-		/// <summary>
-		/// Disposes of the service cache and makes it unusable
-		/// </summary>
-		void Dispose();
-	}
-
 	/// <summary>
 	/// A service that can build and cache view models based on what parameters they were provided to be built with.
 	/// </summary>
-	public sealed class ViewCacheService : IViewCacheService, IDisposable
+	public sealed class MemoryCacheService : IMaterializedViewCacheService, IDisposable
 	{
-
-		internal Factory ViewFactory;
-		internal ConcurrentDictionary<Type, ConcurrentList<CachedView>> _cachedVMs;
+		private ConcurrentDictionary<Type, ConcurrentList<CachedView>> _cachedVms { get; set; }
 
 		/// <summary>
 		/// Default Constructor, use dependency injection if possible
 		/// </summary>
-		public ViewCacheService()
+		public MemoryCacheService()
 		{
-			ViewFactory = new Factory();
-			_cachedVMs = new ConcurrentDictionary<Type, ConcurrentList<CachedView>>();
+			_cachedVms = new ConcurrentDictionary<Type, ConcurrentList<CachedView>>();
 		}
+
+
+		private MemoryCacheSettings Settings
+		{
+			get
+			{
+				return Configuration.Settings as MemoryCacheSettings;
+			}
+		}
+
+
 		/// <summary>
 		/// Register a method and caller that will be mapped to the methods return type when using PropertyLookupDtoAttribute.
 		/// </summary>
@@ -102,14 +40,14 @@ namespace MaterializedViewCache
 		/// <param name="methodCaller"></param>
 		public void Register(MethodInfo method, object methodCaller = null)
 		{
-			ViewFactory.Register(method, methodCaller);
+			Configuration.Container.Register(method, methodCaller);
 		}
 
-		internal CachedView GetView(Type type, Dictionary<string, object> Parameters)
+		private CachedView GetView(Type type, Dictionary<string, object> Parameters)
 		{
-			if (_cachedVMs.ContainsKey(type))
+			if (_cachedVms.ContainsKey(type))
 			{
-				var existingVM = _cachedVMs[type].SingleOrDefault(x => x.Parameters.DictEqual(Parameters));
+				var existingVM = _cachedVms[type].SingleOrDefault(x => x.Parameters.DictEqual(Parameters));
 				if (existingVM != null)
 				{
 					return existingVM;
@@ -117,6 +55,7 @@ namespace MaterializedViewCache
 			}
 			return null;
 		}
+
 		/// <summary>
 		/// Get a cached VM of type with parameters.
 		/// </summary>
@@ -127,6 +66,7 @@ namespace MaterializedViewCache
 		{
 			return (T)Get(typeof(T), Parameters);
 		}
+
 		/// <summary>
 		/// Get a cached VM of type with parameters.
 		/// </summary>
@@ -143,7 +83,7 @@ namespace MaterializedViewCache
 			}
 			else
 			{
-				var vm = ViewFactory.Build(type, Parameters);
+				var vm = Configuration.Container.Build(type, Parameters);
 				Cache(vm, type, Parameters);
 				return vm;
 			}
@@ -159,6 +99,7 @@ namespace MaterializedViewCache
 		{
 			return Exists(typeof(T), Parameters);
 		}
+
 		/// <summary>
 		/// A VM of type with parameters has already been cached.
 		/// </summary>
@@ -179,17 +120,19 @@ namespace MaterializedViewCache
 		{
 			ExpireVM(typeof(T));
 		}
+
 		/// <summary>
 		/// Expires all VMs of type
 		/// </summary>
 		/// <param name="type"></param>
 		public void ExpireVM(Type type)
 		{
-			if (_cachedVMs.ContainsKey(type))
+			if (_cachedVms.ContainsKey(type))
 			{
-				_cachedVMs[type].Clear();
+				_cachedVms[type].Clear();
 			}
 		}
+
 		/// <summary>
 		/// Expires a specific VM based on the parameters provided
 		/// </summary>
@@ -210,34 +153,43 @@ namespace MaterializedViewCache
 			var vm = GetView(type, Parameters);
 			if(vm != null)
 			{
-				_cachedVMs[type].Remove(vm);
+				_cachedVms[type].Remove(vm);
 			}
 		}
 
 		private void Cache(object vm, Type type, Dictionary<string, object> Parameters)
 		{
-			if (!_cachedVMs.ContainsKey(type))
+			if (!_cachedVms.ContainsKey(type))
 			{
-				_cachedVMs.TryAdd(type, new ConcurrentList<CachedView>());
+				_cachedVms.TryAdd(type, new ConcurrentList<CachedView>());
 			}
 
-			_cachedVMs[type].Add(new CachedView
+			_cachedVms[type].Add(new CachedView
 			{
 				CachedType = type,
 				CachedVM = vm,
 				Parameters = Parameters
 			});
 		}
+
+		/// <summary>
+		/// Cleans the cache in memory
+		/// </summary>
+		public void Clean()
+		{
+			foreach(var type in _cachedVms)
+			{
+				type.Value.Clear();
+			}
+		}
+
 		/// <summary>
 		/// Disposes of the service cache and makes it unusable
 		/// </summary>
 		public void Dispose()
 		{
-			ViewFactory.Dispose();
-			ViewFactory = null;
-
-			_cachedVMs.Clear();
-			_cachedVMs = null;
+			_cachedVms.Clear();
+			_cachedVms = null;
 		}
 	}
 }

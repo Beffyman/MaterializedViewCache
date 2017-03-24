@@ -133,7 +133,7 @@ namespace MaterializedViewCache
 			{
 				lock (_lock)
 				{
-					return (IEnumerator<TValue>)_storage.ToArray().GetEnumerator();
+					return _storage.GetEnumerator();
 				}
 			}
 		}

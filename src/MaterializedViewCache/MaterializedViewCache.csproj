@@ -1,27 +1,28 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>
-		netstandard1.1;
-		netstandard1.2;
-		netstandard1.3;
-		netstandard1.4;
-		netstandard1.5;
-		netstandard1.6;
-	</TargetFrameworks>
-    <AssemblyName>MaterializedViewCache</AssemblyName>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>
+			net45;
+			net451;
+			net452;
+			netstandard1.3;
+			netstandard1.4;
+			netstandard1.5;
+			netstandard1.6;
+		</TargetFrameworks>
+		<AssemblyName>MaterializedViewCache</AssemblyName>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<DocumentationFile>bin\Release\MaterializedViewCache.xml</DocumentationFile>
+	</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard1.1|AnyCPU'">
-    <DocumentationFile>bin\Release\netstandard1.1\ViewMaterializerCache.xml</DocumentationFile>
-  </PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Newtonsoft.Json" Version="10.0.1" />
+		<PackageReference Include="System.Threading.Tasks.Parallel" Version="4.3.0" />
+		<PackageReference Include="RavenDB.Client" Version="3.5.3"/>
+	</ItemGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard1.1|AnyCPU'">
-    <DocumentationFile>bin\Debug\netstandard1.1\ViewMaterializerCache.xml</DocumentationFile>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.Threading.Tasks.Parallel" Version="4.3.0" />
-  </ItemGroup>
+	<Target Name="GitVersion" AfterTargets="BeforeBuild">
+		<Exec Command="gitversion.exe /updateassemblyinfo" />
+	</Target>
 
 </Project>

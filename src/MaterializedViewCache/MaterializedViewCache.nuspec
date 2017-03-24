@@ -1,7 +1,7 @@
 <package>
 	<metadata>
 		<id>MaterializedViewCache</id>
-		<version>1.1.0</version>
+		<version>$version$</version>
 		<title>MaterializedViewCache</title>
 		<authors>Beffyman</authors>
 		<owners>Beffyman</owners>
@@ -13,12 +13,14 @@
 		</description>
 		<copyright>Copyright 2017</copyright>
 		<dependencies>
+			<dependency id="Newtonsoft.Json" version="10.0.1" />
+			<dependency id="RavenDB.Client" version="3.5.3" />
 			<dependency id="System.Threading.Tasks.Parallel" version="4.3.0" />
 		</dependencies>
 	</metadata>
 	<files>
 		<file src="bin\Release\**\MaterializedViewCache.dll" target="lib" />
 		<file src="bin\Release\**\MaterializedViewCache.pdb" target="lib" />
-		<file src="bin\Release\**\MaterializedViewCache.xml" target="lib" />
+		<file src="bin\Release\MaterializedViewCache.xml" target="lib" />
 	</files>
 </package>

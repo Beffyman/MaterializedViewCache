@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MaterializedViewCache
+namespace MaterializedViewCache.Services.Memory
 {
     internal class CachedView
     {

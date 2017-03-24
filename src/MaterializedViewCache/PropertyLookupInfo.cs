@@ -6,10 +6,10 @@ using MaterializedViewCache.Attributes;
 
 namespace MaterializedViewCache
 {
-	internal class PropertyLookupInfo
+	internal class MemberLookupInfo
 	{
-		public PropertyInfo propertyInfo { get; set; }
-		public PropertyLookupDtoAttribute attribute { get; set; }
+		public MemberInfo memberInfo { get; set; }
+		public MemberLookupDtoAttribute attribute { get; set; }
 
 	}
 }
