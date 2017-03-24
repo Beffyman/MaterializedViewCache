@@ -46,6 +46,12 @@ namespace MaterializedViewCache
 			return Register(method, methodCaller, null);
 		}
 
+		/// <summary>
+		/// Registers the method and the method used to get its caller to the lookup list.
+		/// </summary>
+		/// <param name="method"></param>
+		/// <param name="methodCallerGetter"></param>
+		/// <returns></returns>
 		public RegisteredDtoContainer Register(MethodInfo method, Func<object> methodCallerGetter)
 		{
 			return Register(method, null, methodCallerGetter);
