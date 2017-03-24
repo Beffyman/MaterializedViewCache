@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Raven.Client.Converters;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -7,7 +8,7 @@ namespace MaterializedViewCache.Services.RavenDb
     internal class ViewJson
     {
 
-		public ulong Id { get; set; }
+		public Int64 Id { get; set; }
 		public int TypeHash { get; set; }
 		public string Json { get; set; }
     }

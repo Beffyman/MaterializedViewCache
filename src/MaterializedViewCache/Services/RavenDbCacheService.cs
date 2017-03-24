@@ -25,6 +25,8 @@ namespace MaterializedViewCache.Services
 		public RavenDbCacheService()
 		{
 			_documentStore = Connect();
+
+			_documentStore.DatabaseCommands.GlobalAdmin.EnsureDatabaseExists(Settings.CacheDatabaseName, ignoreFailures: false);
 		}
 
 		private RavenDbCacheSettings Settings
@@ -40,6 +42,7 @@ namespace MaterializedViewCache.Services
 		{
 			var ravenStore = new DocumentStore()
 			{
+				ApiKey = Settings.ApiKey,
 				Url = Settings.ServerUrl.ToString(),
 				DefaultDatabase = Settings.CacheDatabaseName
 			};
@@ -117,6 +120,7 @@ namespace MaterializedViewCache.Services
 				{
 					session.Delete(val);
 				}
+				session.SaveChanges();
 			}
 		}
 
@@ -140,10 +144,11 @@ namespace MaterializedViewCache.Services
 			using (var session = OpenSession())
 			{
 				var id = Parameters.Hash(type);
-				var val = session.Query<ViewJson, ViewJson_ByAll>().SingleOrDefault(x => x.Id == id);
+				var val = session.Load<ViewJson>(id);
 				if (val != null)
 				{
 					session.Delete(val);
+					session.SaveChanges();
 				}
 				else
 				{
@@ -174,7 +179,8 @@ namespace MaterializedViewCache.Services
 			using (var session = OpenSession())
 			{
 				var id = Parameters.Hash(type);
-				var val = session.Query<ViewJson>().SingleOrDefault(x => x.Id == id);
+				var val = session.Load<ViewJson>(id);
+				//var val = session.Query<ViewJson>().SingleOrDefault(x => x.Id == id);
 				if (val != null)
 				{
 					string outJson = val.Json;
@@ -222,6 +228,7 @@ namespace MaterializedViewCache.Services
 			using (var session = OpenSession())
 			{
 				session.Store(view);
+				session.SaveChanges();
 			}
 
 			return obj;
@@ -247,6 +254,8 @@ namespace MaterializedViewCache.Services
 			{
 				_documentStore.DatabaseCommands.Delete(doc.Key, null);
 			}
+
+			_documentStore.DatabaseCommands.GlobalAdmin.DeleteDatabase(Settings.CacheDatabaseName, true);
 		}
 	}
 }

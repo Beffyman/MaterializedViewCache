@@ -16,16 +16,16 @@ namespace MaterializedViewCache
 		}
 
 
-		public static ulong Hash<T,K>(this Dictionary<T,K> dict, Type type)
+		public static Int64 Hash<T,K>(this Dictionary<T,K> dict, Type type)
 		{
-			ulong hash = (ulong)dict.Count + 1;
+			Int64 hash = (Int64)dict.Count + 1;
 
-			hash *= hash + (uint)type.GetHashCode();
+			hash += hash * (Int64)type.FullName.GetHashCode();
 
 			foreach (var keyval in dict)
 			{
-				hash *= hash + (uint)keyval.Key.GetHashCode();
-				hash *= hash + (uint)keyval.Value.GetHashCode();
+				hash += hash * (Int64)keyval.Key.GetHashCode();
+				hash += hash * (Int64)keyval.Value.GetHashCode();
 			}
 
 			return hash;

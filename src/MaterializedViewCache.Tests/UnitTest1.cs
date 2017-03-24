@@ -1,13 +1,13 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MaterializedViewCache.Attributes;
 using MaterializedViewCache.Services;
 using MaterializedViewCache.Settings;
 using Newtonsoft.Json;
+using Xunit;
 
 namespace MaterializedViewCache.Tests
 {
-	[TestClass]
+
 	public class UnitTest1
 	{
 		public class TestVm
@@ -41,7 +41,7 @@ namespace MaterializedViewCache.Tests
 		}
 
 
-		[TestMethod]
+		[Fact]
 		public void MemoryCacheTest()
 		{
 			Configuration.Setup(new MemoryCacheSettings
@@ -69,10 +69,12 @@ namespace MaterializedViewCache.Tests
 				{ nameof(param3), param3 },
 			});
 
-			Assert.IsNotNull(vm);
+			service.Clean();
+
+			Assert.NotNull(vm);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void RavenDbCacheTest()
 		{
 			Configuration.Setup(new RavenDbCacheSettings
@@ -82,8 +84,8 @@ namespace MaterializedViewCache.Tests
 					Formatting = Formatting.Indented
 				},
 				ParallelGet = false,
-				CacheDatabaseName = "ViewCache",
-				ServerUrl = new Uri("https://localhost:8080")
+				CacheDatabaseName = "ViewTestingDatabase",
+				ServerUrl = new Uri("http://localhost:8080")
 			});
 			Configuration.Container.Register(typeof(UnitTest1).GetMethod(nameof(UnitTest1.Get)), this);
 
@@ -102,7 +104,9 @@ namespace MaterializedViewCache.Tests
 				{ nameof(param3), param3 },
 			});
 
-			Assert.IsNotNull(vm);
+			service.Clean();
+
+			Assert.NotNull(vm);
 		}
 	}
 }

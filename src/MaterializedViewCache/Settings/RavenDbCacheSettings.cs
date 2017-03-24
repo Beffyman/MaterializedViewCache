@@ -13,6 +13,10 @@ namespace MaterializedViewCache.Settings
 		/// Uri of the server hosting RavenDb
 		/// </summary>
 		public Uri ServerUrl { get; set; }
+		/// <summary>
+		/// ApiKey for RavenDB connection
+		/// </summary>
+		public string ApiKey { get; set; }
 
 		/// <summary>
 		/// Database to be used to store the Views

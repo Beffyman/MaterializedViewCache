@@ -1,0 +1,11 @@
+language: csharp
+solution: ./src/MaterializedViewCache.sln
+install:
+    - dotnet restore ./src/MaterializedViewCache.sln
+    - nuget restore ./src/MaterializedViewCache.sln
+    - nuget install xunit.runners -Version 2.2.0 -OutputDirectory testrunner
+script:
+    - dotnet build ./src/MaterializedViewCache.sln -c Release
+    - ./src/packages/xunit.runner.console.2.2.0/tools/xunit.console ./src/MaterializedViewCache.Tests/bin/Release/MaterializedViewCache.dll
+mono: none
+dotnet: 1.0.1

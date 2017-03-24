@@ -44,4 +44,4 @@ using System.Windows;
 [assembly: AssemblyVersion("1.1.1.0")]
 [assembly: AssemblyFileVersion("1.1.1.0")]
 
-[assembly: AssemblyInformationalVersion("1.1.1-MultipleServiceTypes.1+4.Branch.feature/MultipleServiceTypes.Sha.d0c2d42e9900951e92854d981b5daddd2a5a8316")]
+[assembly: AssemblyInformationalVersion("1.1.1-MultipleServiceTypes.1+5.Branch.feature/MultipleServiceTypes.Sha.75958a11f7667b04666162d14214b1230bef0da6")]
