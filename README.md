@@ -17,8 +17,6 @@ public class TestVm
 
 	[MemberLookupDto(typeof(SourceDto), nameof(SourceDto.Property3))]
 	public bool vmProp3 { get; set; }
-
-
 }
 
 
@@ -40,7 +38,6 @@ public SourceDto Get(int param1, string param2, bool param3)
 }
 
 
-[TestMethod]
 public void MemoryCacheTest()
 {
 	Configuration.Setup(new MemoryCacheSettings
@@ -50,7 +47,7 @@ public void MemoryCacheTest()
 			Formatting = Formatting.Indented
 		},
 		ParallelGet = false
-	});
+	},true);
 	Configuration.Container.Register(typeof(UnitTest1).GetMethod(nameof(UnitTest1.Get)), this);
 
 	//Use dependency injection if possible
@@ -68,7 +65,44 @@ public void MemoryCacheTest()
 		{ nameof(param3), param3 },
 	});
 
-	Assert.IsNotNull(vm);
+	service.Clean();
+
+	Assert.NotNull(vm);
+}
+
+public void RavenDbCacheTest()
+{
+	Configuration.Setup(new RavenDbCacheSettings
+	{
+		JsonSettings = new JsonSerializerSettings
+		{
+			Formatting = Formatting.Indented
+		},
+		ParallelGet = false,
+		CacheDatabaseName = "ViewTestingDatabase",
+		ServerUrl = new Uri("http://localhost:8080")
+	},true);
+	Configuration.Container.Register(typeof(UnitTest1).GetMethod(nameof(UnitTest1.Get)), this);
+
+	//Use dependency injection if possible
+	RavenDbCacheService service = new RavenDbCacheService();
+
+	int param1 = 3;
+	string param2 = "testing";
+	bool param3 = false;
+
+
+	var vm = service.Get<TestVm>(new System.Collections.Generic.Dictionary<string, object>
+	{
+		{ nameof(param1), param1 },
+		{ nameof(param2), param2 },
+		{ nameof(param3), param3 },
+	});
+
+	service.Clean();
+
+	Assert.NotNull(vm);
+}
 }
 
 ```
