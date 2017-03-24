@@ -40,8 +40,8 @@ using System.Windows;
 //
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.1.1.0")]
-[assembly: AssemblyVersion("1.1.1.0")]
-[assembly: AssemblyFileVersion("1.1.1.0")]
+// [assembly: AssemblyVersion("2.0.0.0")]
+[assembly: AssemblyVersion("2.0.0.0")]
+[assembly: AssemblyFileVersion("2.0.0.0")]
 
-[assembly: AssemblyInformationalVersion("1.1.1-MultipleServiceTypes.1+7.Branch.feature/MultipleServiceTypes.Sha.8823d33c5d56b9cb4cd5d2c0d0bfdc709e38880e")]
+[assembly: AssemblyInformationalVersion("2.0.0+Branch.master.Sha.566bd2b6af063a014033a22560eeb60f235208da")]
