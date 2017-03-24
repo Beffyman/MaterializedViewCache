@@ -21,9 +21,10 @@ namespace MaterializedViewCache.Settings
 		/// Call this on startup, provide it the settings type you want to use in your application
 		/// </summary>
 		/// <param name="settings"></param>
-		public static void Setup(BaseSettings settings)
+		/// <param name="forceAssign"></param>
+		public static void Setup(BaseSettings settings, bool forceAssign = false)
 		{
-			if(Settings == null)
+			if(Settings == null || forceAssign)
 			{
 				Settings = settings;
 				Container = new RegisteredDtoContainer();

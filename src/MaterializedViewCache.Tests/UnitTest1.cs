@@ -51,7 +51,7 @@ namespace MaterializedViewCache.Tests
 					Formatting = Formatting.Indented
 				},
 				ParallelGet = false
-			});
+			},true);
 			Configuration.Container.Register(typeof(UnitTest1).GetMethod(nameof(UnitTest1.Get)), this);
 
 			//Use dependency injection if possible
@@ -86,7 +86,7 @@ namespace MaterializedViewCache.Tests
 				ParallelGet = false,
 				CacheDatabaseName = "ViewTestingDatabase",
 				ServerUrl = new Uri("http://localhost:8080")
-			});
+			},true);
 			Configuration.Container.Register(typeof(UnitTest1).GetMethod(nameof(UnitTest1.Get)), this);
 
 			//Use dependency injection if possible

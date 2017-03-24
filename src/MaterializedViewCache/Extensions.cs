@@ -20,15 +20,36 @@ namespace MaterializedViewCache
 		{
 			Int64 hash = (Int64)dict.Count + 1;
 
-			hash += hash * (Int64)type.FullName.GetHashCode();
+			hash += hash * GetHash(type);
 
 			foreach (var keyval in dict)
 			{
-				hash += hash * (Int64)keyval.Key.GetHashCode();
-				hash += hash * (Int64)keyval.Value.GetHashCode();
+				hash += hash * GetHash(keyval.Key);
+				hash += hash * GetHash(keyval.Value);
 			}
 
 			return hash;
+		}
+
+		private static Int64 GetHash(object obj)
+		{
+			if(obj is Type t)
+			{
+				return t.FullName.GetHashCode();
+			}
+			else if(obj is string str)
+			{
+				Int64 hash = str.Length;
+				foreach(var b in Encoding.UTF8.GetBytes(str.ToCharArray()))
+				{
+					hash += hash * b;
+				}
+				return hash;
+			}
+			else
+			{
+				return obj.GetHashCode();
+			}
 		}
 
 
