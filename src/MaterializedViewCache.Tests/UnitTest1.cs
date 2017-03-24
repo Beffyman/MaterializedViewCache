@@ -20,8 +20,6 @@ namespace MaterializedViewCache.Tests
 
 			[MemberLookupDto(typeof(SourceDto), nameof(SourceDto.Property3))]
 			public bool vmProp3 { get; set; }
-
-
 		}
 
 

@@ -43,10 +43,19 @@ namespace MaterializedViewCache
 		/// <returns></returns>
 		public RegisteredDtoContainer Register(MethodInfo method,object methodCaller = null)
 		{
+			return Register(method, methodCaller, null);
+		}
 
+		public RegisteredDtoContainer Register(MethodInfo method, Func<object> methodCallerGetter)
+		{
+			return Register(method, null, methodCallerGetter);
+		}
+
+		private RegisteredDtoContainer Register(MethodInfo method, object methodCaller, Func<object> methodCallerGetter)
+		{
 			Type returnType = method.ReturnType;
 
-			if(returnType == typeof(void))
+			if (returnType == typeof(void))
 			{
 				throw new Exception($"Method {method.Name} has a return type of void. You cannot register a method with a return type of void.");
 			}
@@ -59,7 +68,8 @@ namespace MaterializedViewCache
 			var getDelegate = new GetMethodDelegate
 			{
 				Method = method,
-				MethodCaller = methodCaller
+				MethodCaller = methodCaller,
+				MethodCallerGetter = methodCallerGetter
 			};
 
 			DtoLookups.TryAdd(returnType, getDelegate);
@@ -233,7 +243,14 @@ namespace MaterializedViewCache
 				inputParameters.Add(matchingParam);
 			}
 
-			var returnValue = lookupInfo.Method.Invoke(lookupInfo.MethodCaller, inputParameters.ToArray());
+			object caller = lookupInfo.MethodCaller;
+
+			if (caller == null && lookupInfo.MethodCallerGetter != null)
+			{
+				caller = lookupInfo.MethodCallerGetter();
+			}
+
+			var returnValue = lookupInfo.Method.Invoke(caller, inputParameters.ToArray());
 
 
 			if (returnValue.GetType() != dtoType.Key)
