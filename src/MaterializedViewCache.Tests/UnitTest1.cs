@@ -1,27 +1,24 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MaterializedViewCache.Attributes;
+using MaterializedViewCache.Services;
+using MaterializedViewCache.Settings;
+using Newtonsoft.Json;
 
 namespace MaterializedViewCache.Tests
 {
-
-
-
-
-
-
 	[TestClass]
 	public class UnitTest1
 	{
 		public class TestVm
 		{
-			[PropertyLookupDto(typeof(SourceDto), nameof(SourceDto.Property1))]
+			[MemberLookupDto(typeof(SourceDto), nameof(SourceDto.Property1))]
 			public int vmProp1 { get; set; }
 
-			[PropertyLookupDto(typeof(SourceDto), nameof(SourceDto.Property2))]
+			[MemberLookupDto(typeof(SourceDto), nameof(SourceDto.Property2))]
 			public string vmProp2 { get; set; }
 
-			[PropertyLookupDto(typeof(SourceDto), nameof(SourceDto.Property3))]
+			[MemberLookupDto(typeof(SourceDto), nameof(SourceDto.Property3))]
 			public bool vmProp3 { get; set; }
 
 
@@ -47,30 +44,67 @@ namespace MaterializedViewCache.Tests
 
 
 		[TestMethod]
-		public void TestMethod1()
+		public void MemoryCacheTest()
 		{
+			Configuration.Setup(new MemoryCacheSettings
+			{
+				JsonSettings = new JsonSerializerSettings
+				{
+					Formatting = Formatting.Indented
+				},
+				ParallelGet = false
+			});
+			Configuration.Container.Register(typeof(UnitTest1).GetMethod(nameof(UnitTest1.Get)), this);
+
 			//Use dependency injection if possible
-			MaterializedViewCache.ViewCacheService service = new MaterializedViewCache.ViewCacheService();
+			MemoryCacheService service = new MemoryCacheService();
 
 			int param1 = 3;
 			string param2 = "testing";
 			bool param3 = false;
 
 
-			service.Register(typeof(UnitTest1).GetMethod(nameof(UnitTest1.Get)),this);
-
 			var vm = service.Get<TestVm>(new System.Collections.Generic.Dictionary<string, object>
 			{
-				{nameof(param1),param1},
-				{ nameof(param2),param2 },
-				{nameof(param3),param3},
-
+				{ nameof(param1), param1 },
+				{ nameof(param2), param2 },
+				{ nameof(param3), param3 },
 			});
 
 			Assert.IsNotNull(vm);
+		}
+
+		[TestMethod]
+		public void RavenDbCacheTest()
+		{
+			Configuration.Setup(new RavenDbCacheSettings
+			{
+				JsonSettings = new JsonSerializerSettings
+				{
+					Formatting = Formatting.Indented
+				},
+				ParallelGet = false,
+				CacheDatabaseName = "ViewCache",
+				ServerUrl = new Uri("https://localhost:8080")
+			});
+			Configuration.Container.Register(typeof(UnitTest1).GetMethod(nameof(UnitTest1.Get)), this);
+
+			//Use dependency injection if possible
+			RavenDbCacheService service = new RavenDbCacheService();
+
+			int param1 = 3;
+			string param2 = "testing";
+			bool param3 = false;
 
 
+			var vm = service.Get<TestVm>(new System.Collections.Generic.Dictionary<string, object>
+			{
+				{ nameof(param1), param1 },
+				{ nameof(param2), param2 },
+				{ nameof(param3), param3 },
+			});
 
+			Assert.IsNotNull(vm);
 		}
 	}
 }
